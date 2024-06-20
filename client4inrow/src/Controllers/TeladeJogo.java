@@ -1,0 +1,399 @@
+// O controlador TeladeJogo onde dois jogadores alternam turnos para jogar.
+
+package Controllers;
+
+import Client.Client;
+import Jogo.Jogador;
+import Jogo.Tabuleiro;
+import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.CornerRadii;
+import javafx.scene.layout.GridPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.Rectangle;
+import javafx.stage.Stage;
+import javafx.util.Duration;
+
+import java.io.IOException;
+public class TeladeJogo {
+    // Referências do FXML
+    @FXML
+    private GridPane gridPane;
+    @FXML
+    private Label nomeLabel;
+    @FXML
+    private Label nome2Label,LabelColuna;
+    @FXML
+    private Circle ColorP1,ColorP2;
+    @FXML
+    private Button Coluna1,Coluna2,Coluna3,Coluna4,Coluna5,Coluna6,Coluna7;
+
+    // Variaveis para dois jogadores
+    private Jogador player,player2;
+    @FXML
+    private Rectangle rec1,rec2;
+
+    // Variavel para verificar de tem vencedor
+    private boolean win=false;
+
+    // Variavel Tabuleiro
+    private Tabuleiro board;
+
+    // Varialvel do Jogador que esta a jogar
+    private Jogador currentPlayer;
+
+    // Variavel Client
+    private Client client;
+
+    public void initialize() {
+
+        // Cria um novo tabuleiro com 6 linhas e 7 colunas
+        board = new Tabuleiro(6, 7);
+
+        // Adiciona os eventos de clique aos botões das colunas
+        // Cada botão está associado a um índice de coluna
+        Coluna1.setOnAction(event -> handleButtonClick(0));
+        Coluna2.setOnAction(event -> handleButtonClick(1));
+        Coluna3.setOnAction(event -> handleButtonClick(2));
+        Coluna4.setOnAction(event -> handleButtonClick(3));
+        Coluna5.setOnAction(event -> handleButtonClick(4));
+        Coluna6.setOnAction(event -> handleButtonClick(5));
+        Coluna7.setOnAction(event -> handleButtonClick(6));
+
+        // Configura a visibilidade inicial dos botões das colunas como falso
+        Coluna1.setVisible(false);
+        Coluna2.setVisible(false);
+        Coluna3.setVisible(false);
+        Coluna4.setVisible(false);
+        Coluna5.setVisible(false);
+        Coluna6.setVisible(false);
+        Coluna7.setVisible(false);
+
+        // Defina a largura da borda do retângulo rec2 como 5
+        rec2.setStrokeWidth(5);
+
+    }
+
+    // Este método é chamado quando um dos botões das colunas é clicado.
+    public void handleButtonClick(int column) {
+
+        // Chama o método dropPeca do tabuleiro para colocar uma peça na coluna selecionada pelo jogador atual
+        int row = board.dropPeca(column, currentPlayer);
+
+        // Verifica se a queda da peça foi bem-sucedida
+        if (row != -1) {
+            Circle circle = getCircle(row, column);// Obtém o círculo correspondente à posição onde a peça foi colocada
+            animatePieceDrop(circle);// Anima a queda da peça
+            circle.setFill(Color.web(currentPlayer.getColor()));// Define a cor do círculo como a cor do jogador atual
+            circle.setVisible(true);// Torna o círculo visível
+
+            // Envia a mensagem com a coluna selecionada para o servidor, apenas se for a vez do jogador 1
+            if (currentPlayer==player){
+                client.enviarMensagem(Integer.toString(column));
+            }
+
+            // Verifica se houve uma vitória após a jogada
+            checkForWinner(row, column);
+
+            // Alterna para o próximo jogador
+            switchPlayers();
+
+            // Define a visibilidade dos botões das colunas com base no jogador atual
+            if(currentPlayer==player2){
+                Coluna1.setVisible(false);
+                Coluna2.setVisible(false);
+                Coluna3.setVisible(false);
+                Coluna4.setVisible(false);
+                Coluna5.setVisible(false);
+                Coluna6.setVisible(false);
+                Coluna7.setVisible(false);
+            }else {
+                Coluna1.setVisible(true);
+                Coluna2.setVisible(true);
+                Coluna3.setVisible(true);
+                Coluna4.setVisible(true);
+                Coluna5.setVisible(true);
+                Coluna6.setVisible(true);
+                Coluna7.setVisible(true);
+            }
+
+        }
+    }
+
+    // Metodo para animação da peça a cair
+    private void animatePieceDrop(Circle circle) {
+        TranslateTransition tt = new TranslateTransition(Duration.seconds(1), circle);// Cria uma transição de animação de duração de 1 segundo para o círculo
+        tt.setToY(0); // Define a posição final do círculo no eixo Y, determinando a distância vertical que a peça vai cair
+        tt.play();// Inicia a animação
+    }
+
+    // Metodo para obter o circulo na posição desejada
+    private Circle getCircle(int row, int column) {
+        // Filtra os nós dentro do GridPane para encontrar o círculo na posição desejada (linha e coluna)
+        Node node = gridPane.getChildren().stream()
+                .filter(child -> GridPane.getRowIndex(child) == row && GridPane.getColumnIndex(child) == column)
+                .findFirst()
+                .orElse(null);
+
+        if (node instanceof Circle) {
+            return (Circle) node;// Retorna o círculo encontrado
+        } else {
+            return null;// Retorna null caso não encontre um círculo na posição desejada
+        }
+    }
+
+    // Método para verificar o Vencedor
+    private void checkForWinner(int row, int column) {
+        // Verifica se há um vencedor após cada jogada
+        if (board.checkWin(row, column, currentPlayer)) {
+            Platform.runLater(() -> {
+                openVencedorTela(currentPlayer.getName(), currentPlayer.getColor());
+            });
+            // Desabilita todos os botões após o jogo terminar
+            disableAllButtons();
+            win = true; // Define a variável de controle de vitória como verdadeira
+        } else if (board.isFull()) { // Verifica se houve um empate
+            // Desabilita todos os botões após o jogo terminar
+            disableAllButtons();
+            win = true; // Define a variável de controle de vitória como verdadeira
+            // Abre a tela de empate
+            Platform.runLater(() -> {
+                openEmpateTela();
+            });
+        }
+    }
+
+    // Metodo para Trocar o jogador atual
+    private void switchPlayers() {
+        // Alterna entre os jogadores atualmente em jogo
+        if(win==false){
+            // Verifica se o jogador atual é o jogador 1 e, se sim, define o jogador atual como jogador 2, caso contrário, define o jogador atual como jogador 1
+            currentPlayer = (currentPlayer == player) ? player2 : player;
+        }
+        // Atualiza a aparência visual para indicar o jogador atual
+        if(currentPlayer==player){
+            rec1.setStrokeWidth(5);// Destaca o retângulo do jogador 1
+            rec2.setStrokeWidth(0); // Remove o destaque do retângulo do jogador 2
+            LabelColuna.setVisible(true);// Torna o Label de seleção de coluna visível
+        }else {
+            rec2.setStrokeWidth(5);// Destaca o retângulo do jogador 2
+            rec1.setStrokeWidth(0);// Remove o destaque do retângulo do jogador 1
+            LabelColuna.setVisible(false);// Torna o Label de seleção de coluna invisível
+        }
+    }
+
+    // Metodo para Desativar os botões
+    private void disableAllButtons() {
+        Coluna1.setVisible(false);
+        Coluna2.setVisible(false);
+        Coluna3.setVisible(false);
+        Coluna4.setVisible(false);
+        Coluna5.setVisible(false);
+        Coluna6.setVisible(false);
+        Coluna7.setVisible(false);
+    }
+
+    // Metodo que recebe os dados vindo da TerceiraTela como nome do Jogador IP e Cor Selecionada
+    public void receberDadosJogo(String nome, String ip,String cor) {
+
+        // Cria os objetos Jogador para o jogador atual (player) e o jogador adversário (player2)
+        player = new Jogador();
+        player2 = new Jogador();
+
+        // Define o nome e a cor do jogador atual (player)
+        player.setName(nome);
+        player.setColor(cor);
+
+        // Define a cor do jogador adversário (player2) com base na cor do jogador atual
+        if(player.getColor()== "#FFFF00FF"){
+            player2.setColor("#FF0000FF");
+        }else {
+            player2.setColor("#FFFF00FF");
+        }
+
+        // Define os nomes dos jogadores nos respetivos Labels na interface gráfica
+        nomeLabel.setText(player.getName());
+        nome2Label.setText(player2.getName());
+
+        // Define as cores dos círculos dos jogadores na interface gráfica
+        ColorP1.setFill(Color.web(player.getColor()));
+        ColorP2.setFill(Color.web(player2.getColor()));
+
+        // Define o jogador atual como o jogador adversário (player2)
+        currentPlayer = player2;
+
+        // Cria uma instância do cliente e conecta ao servidor utilizando o endereço IP fornecido
+        client = new Client(this);
+        client.conectarAoServidor(ip);
+
+        // Realiza uma animação nos botões de seleção de cor
+        animaçãoBtnCor();
+
+    }
+
+    // Realiza a animação nos botões de seleção de coluna conforme a cor do jogador atual
+    public void animaçãoBtnCor(){
+        // Cria um objeto CornerRadii com raio de 100 para arredondar o background do botão
+        CornerRadii cornerRadii = new CornerRadii(100);
+        // Cria um objeto BackgroundFill com a cor do jogador atual e o CornerRadii definido
+        BackgroundFill BackgroundFill = new BackgroundFill(Color.web(player.getColor()), cornerRadii, null);
+        // Cria um objeto Background com o BackgroundFill definido para o jogador atual
+        Background playerBackground = new Background(BackgroundFill);
+        // Cria um objeto BackgroundFill transparente com o CornerRadii definido
+        BackgroundFill transparentFill = new BackgroundFill(Color.TRANSPARENT, cornerRadii, null);
+        // Cria um objeto Background transparente com o BackgroundFill definido
+        Background transparentBackground = new Background(transparentFill);
+
+        // Define o background dos botões para o background do jogador quando o mouse entra no botão
+        // Define o background dos botões para transparente quando o mouse sai do botão
+        Coluna1.setOnMouseEntered(event -> Coluna1.setBackground(playerBackground));
+        Coluna1.setOnMouseExited(event -> Coluna1.setBackground(transparentBackground));
+
+        Coluna2.setOnMouseEntered(event -> Coluna2.setBackground(playerBackground));
+        Coluna2.setOnMouseExited(event -> Coluna2.setBackground(transparentBackground));
+
+        Coluna3.setOnMouseEntered(event -> Coluna3.setBackground(playerBackground));
+        Coluna3.setOnMouseExited(event -> Coluna3.setBackground(transparentBackground));
+
+        Coluna4.setOnMouseEntered(event -> Coluna4.setBackground(playerBackground));
+        Coluna4.setOnMouseExited(event -> Coluna4.setBackground(transparentBackground));
+
+        Coluna5.setOnMouseEntered(event -> Coluna5.setBackground(playerBackground));
+        Coluna5.setOnMouseExited(event -> Coluna5.setBackground(transparentBackground));
+
+        Coluna6.setOnMouseEntered(event -> Coluna6.setBackground(playerBackground));
+        Coluna6.setOnMouseExited(event -> Coluna6.setBackground(transparentBackground));
+
+        Coluna7.setOnMouseEntered(event -> Coluna7.setBackground(playerBackground));
+        Coluna7.setOnMouseExited(event -> Coluna7.setBackground(transparentBackground));
+
+    }
+
+    // Metodo para definir o nome do Segundo jogador
+    public void segundoPLayer(String nome){
+        // Atualiza o nome do segundo jogador com o nome recebido
+        player2.setName(nome);
+        // Atualiza o texto do nome2Label na interface gráfica com o nome do segundo jogador
+        Platform.runLater(() -> nome2Label.setText(player2.getName()));
+    }
+
+    // Metodo para enviar o nome do primeiro jogador para o servidor
+    public void enviarNomeP(){
+        client.enviarMensagem(player.getName());
+    }
+
+    // Metodo para abrir  a VencedorTela com o nome e a cor do respetivo Vencedor
+    private void openVencedorTela(String nomeVencedor, String corVencedor) {
+        // Abre a tela de vencedor
+        try {
+            // Carrega o arquivo FXML da VencedorTela
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Vencedor.fxml"));
+            Parent root = loader.load();
+
+            // Obtém o controlador da VencedorTela
+            Vencedor controller = loader.getController();
+            // Passa os dados do vencedor para o controlador da VencedorTela
+            controller.receberDados(nomeVencedor, corVencedor);
+
+            // Cria e exibe o stage da VencedorTela
+            Stage stage = new Stage();
+            stage.setTitle("Tela do Vencedor");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+            // Fecha a janela atual da tela de jogo
+            Stage currentStage = (Stage) nomeLabel.getScene().getWindow();
+            currentStage.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Método para abrir a tela de empate
+    private void openEmpateTela() {
+        // Abre a tela de vencedor
+        try {
+            // Carregar o arquivo FXML do empate
+            FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/path/to/Empate.fxml"));
+            Parent root = fxmlLoader.load();
+
+            // Obter o controlador da tela de empate e passar a mensagem de empate
+            Empate controller = fxmlLoader.getController();
+            controller.receberDadosEmpate("Empate!");
+
+            // Configurar a cena e o estágio
+            Stage stage = new Stage();
+            stage.setTitle("Empate");
+            stage.setScene(new Scene(root));
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Metodo para o jogador desistir
+    public void Sair(ActionEvent actionEvent) {
+        try {
+            // Carrega o arquivo FXML da VencedorTela
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Vencedor.fxml"));
+            Parent root = loader.load();
+            // Obtém o controlador da VencedorTela
+            Vencedor controller = loader.getController();
+            // Passa os dados do segundo jogador como vencedor para o controlador da VencedorTela
+            controller.receberDados(player2.getName(), player2.getColor());
+
+            // Envia uma mensagem para o servidor informando que o jogador desistiu
+            client.enviarMensagem("Sair");
+            // Cria e exibe o stage da VencedorTela
+            Stage stage = new Stage();
+            stage.setTitle("Tela do Vencedor");
+            stage.setScene(new Scene(root));
+            stage.show();
+
+            // Fecha a janela atual da tela de jogo
+            Stage currentStage = (Stage) nomeLabel.getScene().getWindow();
+            currentStage.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Metodo para tratar a desistência do segundo jogador
+    public void SegundoPlayerSair(){
+        try {
+            // Carrega o arquivo FXML da VencedorTela
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/Views/Vencedor.fxml"));
+            Parent root = loader.load();
+            // Obtém o controlador da VencedorTela
+            Vencedor controller = loader.getController();
+            // Passa os dados do primeiro jogador como vencedor para o controlador da tela de Vencedor
+            controller.receberDados(player.getName(), player.getColor());
+
+            // Executa no thread da interface gráfica
+            Platform.runLater(() ->{
+                // Cria e exibe o stage da VencedorTela
+                Stage stage = new Stage();
+                stage.setTitle("Tela do Vencedor");
+                stage.setScene(new Scene(root));
+                stage.show();
+                // Fecha a janela atual da tela de jogo
+                Stage currentStage = (Stage) nomeLabel.getScene().getWindow();
+                currentStage.close();
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}

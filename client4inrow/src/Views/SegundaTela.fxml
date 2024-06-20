@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="600"
+            prefWidth="800"
+            style="-fx-background-color: #D6B27E;"
+            xmlns="http://javafx.com/javafx/11.0.2"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="Controllers.SegundaTela">
+
+    <children>
+        <Button fx:id="BtnCor" layoutX="297.0" layoutY="362.0" mnemonicParsing="false" onAction="#EscolherCor" prefHeight="49.0" prefWidth="200.0" style="-fx-background-radius: 0; -fx-background-color: #ffffff; -fx-border-color: #000000;" text="Cor" textFill="#000000">
+            <font>
+                <Font name="System Bold" size="18.0" />
+            </font>
+        </Button>
+        <Button fx:id="BtnLigar" layoutX="297.0" layoutY="421.0" mnemonicParsing="false" onAction="#ProximaPagina" prefHeight="49.0" prefWidth="200.0" style="-fx-background-radius: 0; -fx-background-color: #ffffff; -fx-border-color: #000000;" text="Ligar" textFill="#000000">
+            <font>
+                <Font name="System Bold" size="18.0" />
+            </font>
+        </Button>
+        <Button fx:id="BtnVoltar" layoutX="638.0" layoutY="520.0" mnemonicParsing="false" onAction="#Voltar" prefHeight="44.0" prefWidth="136.0" style="-fx-background-radius: 0; -fx-background-color: #ffffff; -fx-border-color: #000000" text="Voltar" textFill="#000000">
+            <font>
+                <Font name="System Bold" size="20.0" />
+            </font>
+        </Button>
+        <Label layoutX="185.0" layoutY="128.0" prefHeight="142.0" prefWidth="49.0" text="4" textFill="#ffffff" wrapText="true">
+            <font>
+                <Font name="System Bold" size="96.0" />
+            </font>
+        </Label>
+        <Label layoutX="257.0" layoutY="129.0" prefHeight="142.0" prefWidth="108.0" text="IN" textFill="#ffffff">
+            <font>
+                <Font name="System Bold" size="96.0" />
+            </font>
+        </Label>
+        <Label layoutX="380.0" layoutY="129.0" prefHeight="142.0" prefWidth="234.0" text="ROW" textFill="#ffffff">
+            <font>
+                <Font name="System Bold" size="96.0" />
+            </font>
+        </Label>
+    </children>
+
+</AnchorPane>

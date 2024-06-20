@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.shape.Rectangle?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600" prefWidth="800" style="-fx-background-color: #D6B27E;" xmlns="http://javafx.com/javafx/22" xmlns:fx="http://javafx.com/fxml/1" fx:controller="Controllers.TerceiraTela">
+
+    <children>
+        <Label fx:id="TextoLabel" layoutX="306.0" layoutY="30.0" prefHeight="147.0" prefWidth="224.0" text="CONECTA-TE &#10;COM O TEU&#10;PARCEIRO" textAlignment="CENTER" textFill="WHITE">
+            <font>
+                <Font name="System Bold" size="34.0" />
+            </font>
+        </Label>
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#756144" height="89.0" layoutX="45.0" layoutY="202.0" stroke="#756144" strokeType="INSIDE" style="-fx-arc-height: 10; -fx-arc-width: 10;" width="719.0" />
+        <Rectangle arcHeight="5.0" arcWidth="5.0" fill="#756144" height="89.0" layoutX="45.0" layoutY="303.0" stroke="#756144" strokeType="INSIDE" style="-fx-arc-height: 10; -fx-arc-width: 10;" width="719.0" />
+        <Label layoutX="91.0" layoutY="224.0" prefHeight="46.0" prefWidth="116.0" style="-fx-background-color: #d6b27e; -fx-background-radius: 5;" text=" Nome" textAlignment="CENTER" textFill="WHITE">
+            <font>
+                <Font name="System Bold" size="31.0" />
+            </font>
+        </Label>
+        <Label layoutX="91.0" layoutY="321.0" prefHeight="46.0" prefWidth="116.0" style="-fx-background-color: #d6b27e; -fx-background-radius: 5;" text="     IP" textAlignment="CENTER" textFill="WHITE">
+            <font>
+                <Font name="System Bold" size="31.0" />
+            </font>
+        </Label>
+        <TextField fx:id="TxtNome" layoutX="245.0" layoutY="225.0" prefHeight="44.0" prefWidth="480.0" style="-fx-text-inner-color: #FFFFFF; -fx-background-color: #d6b27e;">
+            <font>
+                <Font name="System Bold" size="18.0" />
+            </font></TextField>
+        <TextField fx:id="TxtIP" editable="false" layoutX="245.0" layoutY="325.0" prefHeight="44.0" prefWidth="480.0" style="-fx-background-color: #d6b27e; -fx-text-inner-color: #FFFFFF;">
+            <font>
+                <Font name="System Bold" size="18.0" />
+            </font></TextField>
+        <Button fx:id="BtnConectar" layoutX="297.0" layoutY="421.0" mnemonicParsing="false" onAction="#TelaJogo" prefHeight="49.0" prefWidth="200.0" style="-fx-background-radius: 0; -fx-background-color: #ffffff; -fx-border-color: #000000" text="Conectar" textFill="#000000">
+            <font>
+                <Font name="System Bold" size="18.0" />
+            </font></Button>
+        <Button fx:id="BtnVoltar" layoutX="638.0" layoutY="520.0" mnemonicParsing="false" onAction="#Voltar" prefHeight="44.0" prefWidth="136.0" style="-fx-background-radius: 0; -fx-background-color: #ffffff; -fx-border-color: #000000" text="Voltar" textFill="#000000">
+            <font>
+                <Font name="System Bold" size="20.0" />
+            </font>
+        </Button>
+    </children>
+</AnchorPane>
