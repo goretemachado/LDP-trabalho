@@ -1,6 +1,6 @@
 package Controllers;
 
-import Client.Client;
+import Server.Server;
 import Jogo.Jogador;
 import Jogo.Tabuleiro;
 import javafx.animation.TranslateTransition;
@@ -51,7 +51,7 @@ public class TeladeJogo {
     private Jogador currentPlayer;
 
     //Variavel Client
-    private Client client;
+    private Server server;
 
     public void initialize() {
 
@@ -90,7 +90,7 @@ public class TeladeJogo {
 
             // Envia a mensagem com a coluna selecionada para o servidor, apenas se for a vez do jogador 1
             if (currentPlayer==player){
-                client.enviarMensagem(Integer.toString(column));
+                server.enviarMensagem(Integer.toString(column));
             }
             checkForWinner(row, column);// Verifica se houve uma vitória após a jogada
 
@@ -217,10 +217,6 @@ public class TeladeJogo {
         // Define o jogador atual como o jogador adversário (player2)
         currentPlayer = player2;
 
-        // Cria uma instância do cliente e conecta ao servidor utilizando o endereço IP fornecido
-        client = new Client(this);
-        client.conectarAoServidor(ip);
-
         // Realiza uma animação nos botões de seleção de cor
         animaçãoBtnCor();
 
@@ -274,7 +270,7 @@ public class TeladeJogo {
 
     //Metodo para enviar o nome do primeiro jogador para o servidor
     public void enviarNomeP(){
-        client.enviarMensagem(player.getName());
+        server.enviarMensagem(player.getName());
     }
 
     //Metodo para abrir  a VencedorTela com o nome e a cor do respetivo Vencedor
@@ -316,7 +312,7 @@ public class TeladeJogo {
             controller.receberDados(player2.getName(), player2.getColor());
 
             // Envia uma mensagem para o servidor informando que o jogador desistiu
-            client.enviarMensagem("Desistiu");
+            server.enviarMensagem("Desistiu");
             // Cria e exibe o stage da VencedorTela
             Stage stage = new Stage();
             stage.setTitle("Tela do Vencedor");
